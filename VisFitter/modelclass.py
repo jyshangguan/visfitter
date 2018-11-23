@@ -98,7 +98,7 @@ class ModelCombiner(object):
         self._modelList = modelDict.keys()
         self.__x = xList
         self.__nx = len(xList) # The number of parameters
-        self.__lx = len(xList[0]) # The number of points to be calculated.
+        self.__xshape = xList[0].shape # The shape of the input parameter.
         self.dtype = dtype
         self._mltList = [] # The list of models to multiply to other models
         self._addList = [] # The list of models to add together
@@ -133,13 +133,13 @@ class ModelCombiner(object):
         """
         return self.__nx
 
-    def get_lx(self):
+    def get_xshape(self):
         """
-        Get the length of x parameters.
+        Get the shape of x parameters.
         """
-        return self.__lx
+        return self.__xshape
 
-    def set_xList(self, xList):
+    def set_xList(self, *xList):
         """
         Reset the default active variable array.
 
@@ -154,7 +154,7 @@ class ModelCombiner(object):
         """
         assert len(xList) == self.__nx
         self.__x = xList
-        self.__lx = len(xList[0]) # Reset the number of points to be calculated.
+        self.__xshape = xList[0].shape # Reset the shape of the input.
 
     def combineResult(self, *xpars):
         """
@@ -163,7 +163,8 @@ class ModelCombiner(object):
         Parameters
         ----------
         *xpars : list
-            The list of active variable of the models.
+            The list of active variable of the models.  The inputs should be
+            numpy arrays.
 
         Returns
         -------
@@ -176,10 +177,10 @@ class ModelCombiner(object):
         """
         if len(xpars) == 0:
             xpars = self.__x
-            lx = self.__lx
+            xshape = self.__xshape
         else:
             assert len(xpars) == self.__nx # The input parameter number should be consistent.
-            lx = len(xpars[0])
+            xshape = xpars[0].shape
         #-> Calculate the add model components
         addCmpDict = {}
         for modelName in self._addList:
@@ -193,7 +194,7 @@ class ModelCombiner(object):
             for tmn in mf.multiList:
                 addCmpDict[tmn] *= my
         #-> Add up all the add models
-        result = np.zeros(lx, dtype=self.dtype)
+        result = np.zeros(xshape, dtype=self.dtype)
         #print addCmpDict
         for modelName in self._addList:
             result += addCmpDict[modelName]
