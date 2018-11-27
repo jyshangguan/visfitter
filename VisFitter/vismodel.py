@@ -33,7 +33,8 @@ def Gaussian(x, A, sigma):
 def vis_gauss(u, v, sigma_lm, A=1., i=0., pa=0., l0=0., m0=0.):
     """
     The visibility model of a Gaussian profile, which is inclined to the line of
-    sight with the inclination angle i and position angle pa.
+    sight with the inclination angle i and position angle pa.  The coordinates
+    transformation is consistent with 2017ApJ...839...99P.
 
     Parameters
     ----------
@@ -48,7 +49,7 @@ def vis_gauss(u, v, sigma_lm, A=1., i=0., pa=0., l0=0., m0=0.):
     i : float, default: 0.
         The inclination angle, units: radian.
     pa : float, default: 0.
-        The position angle, units: radian.
+        The position angle (to the east of the north), units: radian.
     l0 : float, default: 0.
         The l coordinate of the center of the model.
     m0 : float, default: 0.
@@ -61,7 +62,7 @@ def vis_gauss(u, v, sigma_lm, A=1., i=0., pa=0., l0=0., m0=0.):
     """
     up = u * np.cos(pa) + v * np.sin(pa)
     vp = v * np.cos(pa) - u * np.sin(pa)
-    rho = np.sqrt(up**2. + (vp * np.cos(i))**2.)
+    rho = np.sqrt((up * np.cos(i))**2. + vp**2.)
     sigma_uv = 0.5 / pi / sigma_lm
     F_uv = Gaussian(rho, A, sigma_uv) * np.exp(-2. * pi * 1j * (u * l0 + v * m0))
     return F_uv
@@ -95,7 +96,8 @@ def vis_point(u, v, A=1., l0=0., m0=0.):
 
 def vis_symmetric_model(u, v, i=0., pa=0., l0=0., m0=0., model="Gaussian", kw_model={}):
     """
-    Calculate the visibility of a symmetric model.
+    Calculate the visibility of a symmetric model.  The coordinates transformation
+    is consistent with 2017ApJ...839...99P.
 
     Parameters
     ----------
@@ -106,7 +108,7 @@ def vis_symmetric_model(u, v, i=0., pa=0., l0=0., m0=0., model="Gaussian", kw_mo
     i : float, default: 0
         The inclination angle, units: radian.
     pa : float, default: 0
-        The position angle, units: radian.
+        The position angle (to the east of the north), units: radian.
     l0 : float, default: 0
         The l coordinate of the center of the model.
     m0 : float, default: 0
@@ -123,7 +125,7 @@ def vis_symmetric_model(u, v, i=0., pa=0., l0=0., m0=0., model="Gaussian", kw_mo
     """
     up = u * np.cos(pa) + v * np.sin(pa)
     vp = v * np.cos(pa) - u * np.sin(pa)
-    rho = np.sqrt(up**2. + (vp * np.cos(i))**2.)
+    rho = np.sqrt((up * np.cos(i))**2. + vp**2.)
     if model == "Gaussian":
         Ifunc  = lambda r: Gaussian(r, **kw_model)
     else:
